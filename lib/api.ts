@@ -48,3 +48,9 @@ export const fetchNoteById = async (id: string): Promise<Note> => {
   const res = await noteServiceClient.get<Note>(`/${id}`);
   return res.data;
 };
+
+export const getNotes = async (tag?: string): Promise<Note[]> => {
+  const params = tag ? { tag } : {};
+  const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/notes`, { params });
+  return data;
+};
