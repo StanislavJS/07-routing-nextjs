@@ -12,3 +12,5 @@ export interface NewNoteData {
   content: string;
   tag: string;
 }
+
+export type NoteTag = 'Work' | 'Personal' | 'Meeting' | 'Shopping' | 'Todo';

@@ -1,14 +1,36 @@
-import NotesClient from "./Notes.client";
+import { fetchNotes } from '@/lib/api';
+import NotesClient from './Notes.client';
+import type { NotesResponse } from '@/types/api';
 
+export default async function NotesFilterPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug?: string[] }>;
+  searchParams: Promise<{ page?: string; search?: string }>;
+}) {
+  const awaitedParams = await params;
+  const awaitedSearchParams = await searchParams;
 
-type NotesPageProps = {
-  params: { slug?: string[] };
-};
+  const page = Number(awaitedSearchParams.page) || 1;
+  const search = awaitedSearchParams.search || '';
 
-export default function NotesPage({ params }: NotesPageProps) {
-  // Якщо slug === ["All"], то фільтрація не застосовується
-  const tag = params.slug?.[0] === "All" ? undefined : params.slug?.[0];
+  let tag = awaitedParams.slug?.[0];
+  if (tag === 'All') {
+    tag = undefined;
+  }
 
-  return <NotesClient tag={tag} />;
+  const initialData: NotesResponse = await fetchNotes(page, search, 12, tag);
+
+  return (
+    <NotesClient
+      initialPage={page}
+      initialSearch={search}
+      initialTag={tag}
+      initialData={initialData}
+    />
+  );
 }
+
+
 
