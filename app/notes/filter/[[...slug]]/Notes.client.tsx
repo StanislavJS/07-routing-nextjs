@@ -5,7 +5,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
 
 import { fetchNotes } from '@/lib/api';
-import type { NotesResponse, Note } from '@/types/api';
+import type { NotesResponse, Note } from '@/types//api';
 
 import NoteList from '@/components/NoteList/NoteList';
 import Modal from '@/components/Modal/Modal';
