@@ -21,18 +21,8 @@ const NoteDetailsClient = () => {
     refetchOnMount: false,
   });
 
-  if (isLoading) return null;
-  if (error || !note) return null;
-
   const closeModal = () => {
     router.back();
-  };
-
-  // Закрытие по клику на фон
-  const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      closeModal();
-    }
   };
 
   // Закрытие по ESC
@@ -46,7 +36,18 @@ const NoteDetailsClient = () => {
     return () => {
       document.removeEventListener("keydown", handleEsc);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (isLoading) return null;
+  if (error || !note) return null;
+
+  // Закрытие по клику на фон
+  const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      closeModal();
+    }
+  };
 
   return (
     <div className={css.overlay} onClick={handleBackgroundClick}>
