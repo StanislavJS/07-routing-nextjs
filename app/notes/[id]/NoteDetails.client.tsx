@@ -1,32 +1,81 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { fetchNoteById } from "@/lib/api";
 import css from '@/components/NoteDetails/NoteDetails.module.css';
+import { useEffect, useState } from "react";
 
-export default function NoteDetailsClient() {
+const NoteDetailsClient = () => {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const { data: note, isLoading, error } = useQuery({
-    queryKey: ["note", id],
+    queryKey: ['note', id],
     queryFn: () => fetchNoteById(id),
     refetchOnMount: false,
   });
 
-  if (isLoading) return <p>Loading, please wait...</p>;
-  if (error || !note) return <p>Something went wrong.</p>;
+  if (isLoading) return null;
+  if (error || !note) return null;
+
+  const closeModal = () => {
+    router.back();
+  };
+
+  // Закрытие по клику на фон
+  const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      closeModal();
+    }
+  };
+
+  // Закрытие по ESC
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeModal();
+      }
+    };
+    document.addEventListener("keydown", handleEsc);
+    return () => {
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, []);
 
   return (
-    <div className={css.container}>
-      <div className={css.item}>
+    <div className={css.overlay} onClick={handleBackgroundClick}>
+      <div className={css.modal}>
         <div className={css.header}>
           <h2>{note.title}</h2>
-          <button className={css.editBtn}>Edit note</button>
         </div>
-        <p className={css.content}>{note.content}</p>
-        <p className={css.date}>{note.createdAt}</p>
+
+        {isClient && (
+          <p className={css.date}>
+            {note.updatedAt
+              ? `Updated at: ${new Date(note.updatedAt).toLocaleString()}`
+              : `Created at: ${new Date(note.createdAt).toLocaleString()}`}
+          </p>
+        )}
+
+        <a
+          href="#"
+          className={css.close}
+          onClick={(e) => {
+            e.preventDefault();
+            closeModal();
+          }}
+        >
+          Close
+        </a>
       </div>
     </div>
   );
-}
+};
+
+export default NoteDetailsClient;

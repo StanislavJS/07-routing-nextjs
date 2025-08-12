@@ -1,21 +1,53 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import css from './TagsMenu.module.css';
 import type { NoteTag } from '@/types/note';
 
-const tags: NoteTag[] = ['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'];
+interface TagsMenuProps {
+  tags: NoteTag[];
+}
 
-const TagsMenu = () => {
+export default function TagsMenu({ tags }: TagsMenuProps) {
   const [menuVisible, setMenuVisible] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const toggleMenu = useCallback(() => {
     setMenuVisible((visible) => !visible);
   }, []);
 
+  const closeMenu = useCallback(() => {
+    setMenuVisible(false);
+  }, []);
+
+  // Закрытие при клике вне меню
+  useEffect(() => {
+    if (!menuVisible) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        closeMenu();
+      }
+    };
+
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeMenu();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEsc);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [menuVisible, closeMenu]);
+
   return (
-    <div className={css.menuContainer}>
+    <div className={css.menuContainer} ref={menuRef}>
       <button
         className={css.menuButton}
         onClick={toggleMenu}
@@ -30,21 +62,22 @@ const TagsMenu = () => {
         <ul className={css.menuList} role="menu">
           <li className={css.menuItem} role="none">
             <Link
-              href="/notes/filter/All"
+              href="/notes/filter"
               className={css.menuLink}
               role="menuitem"
-              onClick={toggleMenu}
+              onClick={closeMenu}
             >
               All notes
             </Link>
           </li>
+
           {tags.map((tag) => (
             <li key={tag} className={css.menuItem} role="none">
               <Link
                 href={`/notes/filter/${tag}`}
                 className={css.menuLink}
                 role="menuitem"
-                onClick={toggleMenu}
+                onClick={closeMenu}
               >
                 {tag}
               </Link>
@@ -54,6 +87,4 @@ const TagsMenu = () => {
       )}
     </div>
   );
-};
-
-export default TagsMenu;
+}

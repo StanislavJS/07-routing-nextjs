@@ -1,6 +1,9 @@
 import Link from "next/link";
 import css from "./Header.module.css";
 import TagsMenu from "../TagsMenu/TagsMenu";
+import type { NoteTag } from "@/types/note";
+
+const tags: NoteTag[] = ['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'];
 
 export default function Header() {
   return (
@@ -14,11 +17,10 @@ export default function Header() {
             <Link href="/">Home</Link>
           </li>
           <li>
-            <TagsMenu tags={[]} />
+            <TagsMenu tags={tags} />
           </li>
         </ul>
       </nav>
     </header>
   );
 }
-

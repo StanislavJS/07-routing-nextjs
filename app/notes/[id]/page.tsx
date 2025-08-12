@@ -8,15 +8,10 @@ type Props = {
 
 const NoteDetails = async ({ params }: Props) => {
   const { id } = await params;
-
-  if (!id || typeof id !== "string") {
-    throw new Error(`Invalid note ID: ${id}`);
-  }
-
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ["note", id],
+    queryKey: ['note', id],
     queryFn: () => fetchNoteById(id),
   });
 

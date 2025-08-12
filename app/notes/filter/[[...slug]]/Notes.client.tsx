@@ -5,7 +5,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
 
 import { fetchNotes } from '@/lib/api';
-import type { NotesResponse } from '@/types/api';
+import type { NotesResponse, Note } from '@/types/api';
 
 import NoteList from '@/components/NoteList/NoteList';
 import Modal from '@/components/Modal/Modal';
@@ -28,6 +28,7 @@ export default function NotesClient({
   initialData,
 }: NotesClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [debounceSearchTerm] = useDebounce(searchTerm, 1000);
@@ -70,11 +71,41 @@ export default function NotesClient({
         </button>
       </header>
 
-      {data && <NoteList notes={data.notes} />}
+      {data && (
+        <NoteList
+          notes={data.notes}
+          onSelectNote={(note) => setSelectedNote(note)}
+        />
+      )}
 
+      {/* Модалка создания */}
       {isModalOpen && (
         <Modal onClose={closeModal}>
           <NoteForm onClose={closeModal} />
+        </Modal>
+      )}
+
+      {/* Модалка деталей */}
+      {selectedNote && (
+        <Modal onClose={() => setSelectedNote(null)}>
+          <div>
+            <h2>{selectedNote.title}</h2>
+            <p>{selectedNote.content}</p>
+            <p style={{ color: 'gray', fontSize: '0.9rem' }}>
+              {selectedNote.updatedAt
+                ? `Updated at: ${new Date(selectedNote.updatedAt).toLocaleString()}`
+                : `Created at: ${new Date(selectedNote.createdAt).toLocaleString()}`}
+            </p>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setSelectedNote(null);
+              }}
+            >
+              Close
+            </a>
+          </div>
         </Modal>
       )}
     </div>

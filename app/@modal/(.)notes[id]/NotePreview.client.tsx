@@ -1,9 +1,9 @@
 'use client';
-import { useQuery } from '@tanstack/react-query';
 import { fetchNoteById } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import css from '@/components/NotePreview/NotePreview.module.css';
 import Modal from '@/components/Modal/Modal';
+import { useQuery } from '@tanstack/react-query';
 
 type Props = { noteId: string };
 
@@ -21,6 +21,7 @@ export default function NotePreview({ noteId }: Props) {
   });
 
   const close = () => router.back();
+
 
   return (
     <Modal onClose={close}>

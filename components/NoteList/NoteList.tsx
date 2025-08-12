@@ -1,15 +1,14 @@
-import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteNote } from "@/lib/api";
 import type { Note } from "@/types/note";
-
 import css from "./NoteList.module.css";
 
 interface NoteListProps {
   notes: Note[];
+  onSelectNote: (note: Note) => void;
 }
 
-export default function NoteList({ notes }: NoteListProps) {
+export default function NoteList({ notes, onSelectNote }: NoteListProps) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -26,10 +25,14 @@ export default function NoteList({ notes }: NoteListProps) {
           <h2 className={css.title}>{note.title}</h2>
           <p className={css.content}>{note.content}</p>
           <div className={css.footer}>
-                  <span className={css.tag}>{note.tag}</span>
-                  <Link href={`/notes/${note.id}`} className={css.link}>
-                    View details
-                  </Link>
+            <span className={css.tag}>{note.tag}</span>
+            <button
+              type="button"
+              className={css.link}
+              onClick={() => onSelectNote(note)}
+            >
+              View details
+            </button>
             <button
               type="button"
               className={css.button}
@@ -43,4 +46,3 @@ export default function NoteList({ notes }: NoteListProps) {
     </ul>
   );
 }
-
