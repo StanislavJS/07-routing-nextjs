@@ -4,11 +4,11 @@ import type { Note } from "@/types/note";
 import css from "./NoteList.module.css";
 
 interface NoteListProps {
-  notes: Note[];
+  notes?: Note[];  // зробити notes опційним
   onSelectNote: (note: Note) => void;
 }
 
-export default function NoteList({ notes, onSelectNote }: NoteListProps) {
+export default function NoteList({ notes = [], onSelectNote }: NoteListProps) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -17,6 +17,10 @@ export default function NoteList({ notes, onSelectNote }: NoteListProps) {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
     },
   });
+
+  if (notes.length === 0) {
+    return <p>No notes found.</p>;
+  }
 
   return (
     <ul className={css.list}>

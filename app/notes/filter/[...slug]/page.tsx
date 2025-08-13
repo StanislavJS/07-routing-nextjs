@@ -16,9 +16,7 @@ export default async function NotesFilterPage({
   const search = awaitedSearchParams.search || '';
 
   let tag = awaitedParams.slug?.[0];
-  if (tag === 'All') {
-    tag = undefined;
-  }
+if (tag === 'All') tag = undefined;
 
   const initialData: NotesResponse = await fetchNotes(page, search, 12, tag);
 
@@ -31,6 +29,3 @@ export default async function NotesFilterPage({
     />
   );
 }
-
-
-

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import css from './TagsMenu.module.css';
 import type { NoteTag } from '@/types/note';
 
@@ -12,6 +13,8 @@ interface TagsMenuProps {
 export default function TagsMenu({ tags }: TagsMenuProps) {
   const [menuVisible, setMenuVisible] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const activeTag = pathname?.split('/').pop(); // остання частина URL
 
   const toggleMenu = useCallback(() => {
     setMenuVisible((visible) => !visible);
@@ -21,7 +24,6 @@ export default function TagsMenu({ tags }: TagsMenuProps) {
     setMenuVisible(false);
   }, []);
 
-  // Закрытие при клике вне меню
   useEffect(() => {
     if (!menuVisible) return;
 
@@ -46,6 +48,10 @@ export default function TagsMenu({ tags }: TagsMenuProps) {
     };
   }, [menuVisible, closeMenu]);
 
+  const getLinkClass = (tag: string) =>
+    `${css.menuLink} ${activeTag === tag ? css.active : ''}`;
+  
+
   return (
     <div className={css.menuContainer} ref={menuRef}>
       <button
@@ -62,8 +68,8 @@ export default function TagsMenu({ tags }: TagsMenuProps) {
         <ul className={css.menuList} role="menu">
           <li className={css.menuItem} role="none">
             <Link
-              href="/notes/filter"
-              className={css.menuLink}
+              href="/notes/filter/All"
+              className={getLinkClass('All')}
               role="menuitem"
               onClick={closeMenu}
             >
@@ -75,7 +81,7 @@ export default function TagsMenu({ tags }: TagsMenuProps) {
             <li key={tag} className={css.menuItem} role="none">
               <Link
                 href={`/notes/filter/${tag}`}
-                className={css.menuLink}
+                className={getLinkClass(tag)}
                 role="menuitem"
                 onClick={closeMenu}
               >

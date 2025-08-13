@@ -1,4 +1,4 @@
-import NotePreview from "@/app/@modal/(.)notes[id]/NotePreview.client";
+import NotePreview from "../../@modal/(.)notes/[id]/NotePreview.client";
 import {
   QueryClient,
   HydrationBoundary,
