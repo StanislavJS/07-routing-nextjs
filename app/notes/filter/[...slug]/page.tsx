@@ -21,11 +21,12 @@ if (tag === 'All') tag = undefined;
   const initialData: NotesResponse = await fetchNotes(page, search, 12, tag);
 
   return (
-    <NotesClient
-      initialPage={page}
-      initialSearch={search}
-      initialTag={tag}
-      initialData={initialData}
-    />
+   <NotesClient
+  initialPage={page}
+  initialSearch={search}
+  initialTag={tag ?? 'All'} // якщо tag undefined, передаємо 'All'
+  initialData={initialData}
+/>
+
   );
 }
