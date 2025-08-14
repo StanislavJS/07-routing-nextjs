@@ -4,14 +4,14 @@ import type { Note } from "@/types/note";
 import css from "./NoteList.module.css";
 
 interface NoteListProps {
-  notes?: Note[];  // зробити notes опційним
-  onSelectNote: (note: Note) => void;
+  notes?: Note[]; // notes опційний
+  onSelectNote: (note: Note) => void; // функція для перегляду деталей
 }
 
 export default function NoteList({ notes = [], onSelectNote }: NoteListProps) {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteNote(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
@@ -40,7 +40,7 @@ export default function NoteList({ notes = [], onSelectNote }: NoteListProps) {
             <button
               type="button"
               className={css.button}
-              onClick={() => mutation.mutate(note.id)}
+              onClick={() => deleteMutation.mutate(note.id)}
             >
               Delete
             </button>
