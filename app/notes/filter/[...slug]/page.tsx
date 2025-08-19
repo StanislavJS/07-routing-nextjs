@@ -6,27 +6,27 @@ export default async function NotesFilterPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ slug?: string[] }>;
+  params: Promise<{ slug: string[] }>;
   searchParams: Promise<{ page?: string; search?: string }>;
 }) {
-  const awaitedParams = await params;
-  const awaitedSearchParams = await searchParams;
+  const { slug } = await params;
+  const { page: rawPage, search: rawSearch } = await searchParams;
 
-  const page = Number(awaitedSearchParams.page) || 1;
-  const search = awaitedSearchParams.search || '';
+  const page = Number(rawPage) || 1;
+  const search = rawSearch || '';
 
-  let tag = awaitedParams.slug?.[0];
-if (tag === 'All') tag = undefined;
+  let tag: string | undefined = slug[0];
+  if (tag === 'All') tag = undefined;
 
   const initialData: NotesResponse = await fetchNotes(page, search, 12, tag);
 
   return (
-   <NotesClient
-  initialPage={page}
-  initialSearch={search}
-  initialTag={tag ?? 'All'} // якщо tag undefined, передаємо 'All'
-  initialData={initialData}
-/>
-
+    <NotesClient
+      initialPage={page}
+      initialSearch={search}
+      initialTag={tag ?? 'All'}
+      initialData={initialData}
+    />
   );
 }
+

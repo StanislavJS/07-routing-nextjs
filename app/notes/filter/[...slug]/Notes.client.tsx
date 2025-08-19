@@ -17,7 +17,7 @@ import css from '@/components/NotePage/NotePage.module.css';
 type NotesClientProps = {
   initialPage: number;
   initialSearch: string;
-  initialTag: string; // обов'язковий
+  initialTag: string;
   initialData: NotesResponse;
 };
 
@@ -33,14 +33,21 @@ export default function NotesClient({
   const [debounceSearchTerm] = useDebounce(searchTerm, 1000);
   const perPage = 12;
 
-  const { data } = useQuery<NotesResponse>({
+  const shouldUseInitialData =
+    currentPage === initialPage && debounceSearchTerm === initialSearch;
+
+  const { data } = useQuery({
     queryKey: ['notes', debounceSearchTerm, currentPage, initialTag],
     queryFn: () =>
       fetchNotes(currentPage, debounceSearchTerm, perPage, initialTag),
-    initialData:
-      currentPage === initialPage && debounceSearchTerm === initialSearch
-        ? initialData
-        : undefined,
+    ...(shouldUseInitialData
+      ? {
+          initialData,
+          placeholderData: () => initialData,
+        }
+      : {
+          keepPreviousData: true,
+        }),
   });
 
   const openModal = () => setIsModalOpen(true);
@@ -70,15 +77,13 @@ export default function NotesClient({
         </button>
       </header>
 
-         {notesExist && (
-              <NoteList
-                notes={data!.notes}
-                onSelectNote={() => {}} 
-              />
-        )}
+      {notesExist && (
+        <NoteList
+          notes={data!.notes}
+          onSelectNote={() => {}}
+        />
+      )}
 
-
-      {/* Модалка створення нотатки */}
       {isModalOpen && (
         <Modal onClose={closeModal}>
           <NoteForm onClose={closeModal} />
