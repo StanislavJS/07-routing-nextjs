@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useQuery, QueryObserverResult } from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
+import type { NotesResponse } from '@/types/note';
 
 import { fetchNotes } from '@/lib/api';
-import type { NotesResponse } from '@/types/api';
-
 import NoteList from '@/components/NoteList/NoteList';
 import Modal from '@/components/Modal/Modal';
 import SearchBox from '@/components/SearchBox/SearchBox';
@@ -18,37 +17,38 @@ type NotesClientProps = {
   initialPage: number;
   initialSearch: string;
   initialTag: string;
-  initialData: NotesResponse;
 };
 
 export default function NotesClient({
   initialPage,
   initialSearch,
   initialTag,
-  initialData,
 }: NotesClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [currentPage, setCurrentPage] = useState(initialPage);
+  const [currentTag, setCurrentTag] = useState(initialTag);
   const [debounceSearchTerm] = useDebounce(searchTerm, 1000);
   const perPage = 12;
 
-  const shouldUseInitialData =
-    currentPage === initialPage && debounceSearchTerm === initialSearch;
+  useEffect(() => {
+    setCurrentTag(initialTag);
+    setCurrentPage(1);
+    setSearchTerm('');
+  }, [initialTag]);
 
-  const { data } = useQuery({
-    queryKey: ['notes', debounceSearchTerm, currentPage, initialTag],
+  const queryResult: QueryObserverResult<NotesResponse, unknown> = useQuery({
+    queryKey: ['notes', debounceSearchTerm, currentPage, currentTag],
     queryFn: () =>
-      fetchNotes(currentPage, debounceSearchTerm, perPage, initialTag),
-    ...(shouldUseInitialData
-      ? {
-          initialData,
-          placeholderData: () => initialData,
-        }
-      : {
-          keepPreviousData: true,
-        }),
+      fetchNotes(
+        currentPage,
+        debounceSearchTerm,
+        perPage,
+        currentTag === 'All' ? undefined : currentTag
+      ),
   });
+
+  const { data } = queryResult;
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -77,11 +77,10 @@ export default function NotesClient({
         </button>
       </header>
 
-      {notesExist && (
-        <NoteList
-          notes={data!.notes}
-          onSelectNote={() => {}}
-        />
+      {notesExist ? (
+        <NoteList notes={data!.notes} onSelectNote={() => {}} />
+      ) : (
+        <p className={css.emptyMessage}>No notes found.</p>
       )}
 
       {isModalOpen && (

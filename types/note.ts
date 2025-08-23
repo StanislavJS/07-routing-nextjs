@@ -14,3 +14,8 @@ export interface NewNoteData {
 }
 
 export type NoteTag = 'Work' | 'Personal' | 'Meeting' | 'Shopping' | 'Todo';
+
+export type NotesResponse = {
+  notes: Note[];
+  totalPages: number;
+};
