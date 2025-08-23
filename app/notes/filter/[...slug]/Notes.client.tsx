@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQuery, QueryObserverResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
 import type { NotesResponse } from '@/types/note';
 
@@ -17,12 +17,14 @@ type NotesClientProps = {
   initialPage: number;
   initialSearch: string;
   initialTag: string;
+  initialData?: NotesResponse; // данные с сервера
 };
 
 export default function NotesClient({
   initialPage,
   initialSearch,
   initialTag,
+  initialData,
 }: NotesClientProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(initialSearch);
@@ -31,13 +33,15 @@ export default function NotesClient({
   const [debounceSearchTerm] = useDebounce(searchTerm, 1000);
   const perPage = 12;
 
+  // Обновление тега при изменении пропа
   useEffect(() => {
     setCurrentTag(initialTag);
     setCurrentPage(1);
     setSearchTerm('');
   }, [initialTag]);
 
-  const queryResult: QueryObserverResult<NotesResponse, unknown> = useQuery({
+  // useQuery без keepPreviousData и корректный initialData
+  const query = useQuery({
     queryKey: ['notes', debounceSearchTerm, currentPage, currentTag],
     queryFn: () =>
       fetchNotes(
@@ -46,9 +50,10 @@ export default function NotesClient({
         perPage,
         currentTag === 'All' ? undefined : currentTag
       ),
+    initialData: initialData ?? undefined, // TS теперь не ругается
   });
 
-  const { data } = queryResult;
+  const data = query.data as NotesResponse | undefined;
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -58,7 +63,7 @@ export default function NotesClient({
     setCurrentPage(1);
   };
 
-  const notesExist = Array.isArray(data?.notes) && data.notes.length > 0;
+  const notesExist = !!data?.notes?.length;
   const totalPages = data?.totalPages ?? 1;
 
   return (
@@ -77,10 +82,13 @@ export default function NotesClient({
         </button>
       </header>
 
+      {query.isLoading && <p>Loading notes...</p>}
+      {query.isError && <p>Error loading notes.</p>}
+
       {notesExist ? (
         <NoteList notes={data!.notes} onSelectNote={() => {}} />
       ) : (
-        <p className={css.emptyMessage}>No notes found.</p>
+        !query.isLoading && <p className={css.emptyMessage}>No notes found.</p>
       )}
 
       {isModalOpen && (

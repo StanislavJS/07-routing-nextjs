@@ -19,6 +19,7 @@ export default async function NotesFilterPage({
   let tag: string | undefined = slug[0];
   if (tag === 'All') tag = undefined;
 
+
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery<NotesResponse>({
@@ -26,8 +27,11 @@ export default async function NotesFilterPage({
     queryFn: () => fetchNotes(page, search, 12, tag),
   });
 
+ 
+  const dehydratedState = dehydrate(queryClient);
+
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
+    <HydrationBoundary state={dehydratedState}>
       <NotesClient
         initialPage={page}
         initialSearch={search}
