@@ -1,9 +1,10 @@
+// Notes.client.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
-import type { NotesResponse } from '@/types/note';
+import type { NotesResponse, NoteTag } from '@/types/note';
 
 import { fetchNotes } from '@/lib/api';
 import NoteList from '@/components/NoteList/NoteList';
@@ -16,8 +17,8 @@ import css from '@/components/NotePage/NotePage.module.css';
 type NotesClientProps = {
   initialPage: number;
   initialSearch: string;
-  initialTag: string;
-  initialData?: NotesResponse; // данные с сервера
+  initialTag: 'All' | NoteTag;
+  initialData?: NotesResponse;
 };
 
 export default function NotesClient({
@@ -30,27 +31,25 @@ export default function NotesClient({
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [currentTag, setCurrentTag] = useState(initialTag);
-  const [debounceSearchTerm] = useDebounce(searchTerm, 1000);
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 1000);
   const perPage = 12;
 
-  // Обновление тега при изменении пропа
   useEffect(() => {
     setCurrentTag(initialTag);
     setCurrentPage(1);
     setSearchTerm('');
   }, [initialTag]);
 
-  // useQuery без keepPreviousData и корректный initialData
   const query = useQuery({
-    queryKey: ['notes', debounceSearchTerm, currentPage, currentTag],
+    queryKey: ['notes', debouncedSearchTerm, currentPage, currentTag],
     queryFn: () =>
       fetchNotes(
         currentPage,
-        debounceSearchTerm,
+        debouncedSearchTerm,
         perPage,
         currentTag === 'All' ? undefined : currentTag
       ),
-    initialData: initialData ?? undefined, // TS теперь не ругается
+    initialData: initialData ?? undefined,
   });
 
   const data = query.data as NotesResponse | undefined;

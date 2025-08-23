@@ -1,17 +1,20 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { fetchNoteById } from '@/lib/api';
-import Modal from '@/components/Modal/Modal';
+import { useRouter } from 'next/navigation';
 import css from '@/components/NotePreview/NotePreview.module.css';
+import Modal from '@/components/Modal/Modal';
+import { fetchNoteById } from '@/lib/api';
+import type { Note } from '@/types/note';
 
-type Props = { noteId: string };
+interface NotePreviewProps {
+  noteId: string;
+}
 
-export default function NotePreview({ noteId }: Props) {
+export default function NotePreview({ noteId }: NotePreviewProps) {
   const router = useRouter();
 
-  const { data: note, isLoading, error } = useQuery({
+  const { data: note, isLoading, isError } = useQuery<Note>({
     queryKey: ['note', noteId],
     queryFn: () => fetchNoteById(noteId),
     refetchOnMount: false,
@@ -22,13 +25,12 @@ export default function NotePreview({ noteId }: Props) {
   return (
     <Modal onClose={close}>
       <div className={css.container}>
-        {/* Кнопка закрытия всегда доступна */}
         <button className={css.closeButton} onClick={close}>
           Close
         </button>
 
         {isLoading && <p>Loading...</p>}
-        {error && <p>Something went wrong.</p>}
+        {isError && <p>Something went wrong.</p>}
 
         {note && (
           <>
