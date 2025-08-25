@@ -33,13 +33,12 @@ export default async function NotesFilterPage({ params, searchParams }: NotesFil
   const dehydratedState = dehydrate(queryClient);
 
   return (
-    <HydrationBoundary state={dehydratedState}>
-      <NotesClient
-        initialPage={page}
-        initialSearch={search}
-        initialTag={isNoteTag(tag) ? tag : 'All'}
-        initialData={queryClient.getQueryData(['notes', page, search, tag])}
-      />
-    </HydrationBoundary>
-  );
+  <HydrationBoundary state={dehydratedState}>
+    <NotesClient
+      initialPage={page}
+      initialSearch={search}
+      initialTag={isNoteTag(tag) ? tag : 'All'}
+    />
+  </HydrationBoundary>
+);
 }
